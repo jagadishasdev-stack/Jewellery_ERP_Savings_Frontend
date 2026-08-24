@@ -1,0 +1,280 @@
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { Box, Typography, CircularProgress } from "@mui/material";
+import axios from "axios";
+import ProductsList from "./ProductsList";
+import APP_CONFIG from "../../config/constants";
+import theme from "../../theme";
+
+const PAGE_LIMIT = 20;
+
+const PURITY_MAP = { "22K": 916, "18K": 750 };
+const METAL_MAP = { Gold: 1, Silver: 2, Platinum: 3 };
+
+const sortOptionToParam = (option) => {
+  switch (option) {
+    case "Price : Low-High":
+      return { sort_by: "price", sort_order: "asc" };
+    case "Price : High-Low":
+      return { sort_by: "price", sort_order: "desc" };
+    case "Product A-Z":
+      return { sort_by: "tagno", sort_order: "asc" };
+    case "Product Z-A":
+      return { sort_by: "tagno", sort_order: "desc" };
+    default:
+      return {};
+  }
+};
+
+const mapItem = (item) => ({
+  tagno: item.tagno,
+  label: `Tag #${item.tagno}`,
+  currentPrice: item.actual_price ?? 0,
+  actualPrice: item.false_price ?? 0,
+  images: item.images,
+  stockLeft: item.pcs ?? 1,
+  productType: item.itemtype === 1 ? "Gold" : "Diamond",
+  gross: item.gross,
+  netwt: item.netwt,
+  purity: item.purity,
+  metaltype: item.metaltype,
+  itemtype: item.itemtype,
+  design: item.design,
+  flag: item.flag,
+  entrydate: item.entrydate,
+  category: item.category,
+  is_wishlisted: item.is_wishlisted || false,
+  is_in_cart: item.is_in_cart || false,
+});
+
+const ALLOWED_FLAGS = ["F", "N", "E"];
+
+function AllProductsSection({
+  appliedFilterOptions,
+  sortOption,
+  searchTerm,
+  adminUserId,
+  wishlistItems,
+  cartItems,
+}) {
+  const [pages, setPages] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState(null);
+
+  const sentinelRef = useRef(null);
+  const observerRef = useRef(null);
+
+  // ── Derived: are any filters / sort / search active? ─────────────────────
+  const isFilterOrSortActive =
+    searchTerm.trim().length > 0 ||
+    sortOption !== "" ||
+    Object.values(appliedFilterOptions).some((opts) => opts.length > 0);
+
+  // ── Build params for /stocks/filter ──────────────────────────────────────
+  const buildFilterParams = useCallback(
+    (page) => {
+      const { sort_by, sort_order } = sortOptionToParam(sortOption);
+
+      const metaltypeIds = appliedFilterOptions["Metal"]
+        ?.map((m) => METAL_MAP[m])
+        .filter(Boolean)
+        .join(",");
+
+      const purityVals = appliedFilterOptions["Purity"]
+        ?.map((p) => PURITY_MAP[p])
+        .filter(Boolean)
+        .join(",");
+
+      const priceOpts = appliedFilterOptions["Price Range"] ?? [];
+      const weightOpts = appliedFilterOptions["Weight"] ?? [];
+
+      return {
+        store_id: APP_CONFIG.STORE_ID,
+        branch_id: APP_CONFIG.BRANCH,
+        user_id: adminUserId,
+        page,
+        limit: PAGE_LIMIT,
+        // sort
+        ...(sort_by && { sort_by }),
+        ...(sort_order && { sort_order }),
+        // filters — only send when values exist
+        ...(appliedFilterOptions["Category"]?.length && {
+          itemtype: appliedFilterOptions["Category"].join(","),
+        }),
+        ...(appliedFilterOptions["Design"]?.length && {
+          design: appliedFilterOptions["Design"].join(","),
+        }),
+        ...(metaltypeIds && { metaltype: metaltypeIds }),
+        ...(purityVals && { purity: purityVals }),
+        ...(priceOpts.length && {
+          price_min: Math.min(...priceOpts),
+          price_max: Math.max(...priceOpts),
+        }),
+        ...(weightOpts.length && {
+          netwt_min: Math.min(...weightOpts),
+          netwt_max: Math.max(...weightOpts),
+        }),
+      };
+    },
+    [appliedFilterOptions, sortOption, adminUserId],
+  );
+
+  // ── Fetch a single page ───────────────────────────────────────────────────
+  const fetchPage = useCallback(
+    async (page) => {
+      try {
+        setLoadingMore(true);
+        setError(null);
+
+        const baseURL = process.env.REACT_APP_API_BASE_URL;
+
+        let raw = [];
+        let responseTotalPages = 1;
+
+        if (isFilterOrSortActive) {
+          // ── Filtered / sorted endpoint ──────────────────────────────────
+          const response = await axios.get(
+            `${baseURL}/api/e-com/stocks/filter`,
+            { params: buildFilterParams(page) },
+          );
+          raw = response.data?.data ?? [];
+          responseTotalPages = response.data?.totalPages ?? 1;
+        } else {
+          // ── Default unfiltered infinite scroll ──────────────────────────
+          const response = await axios.get(`${baseURL}/api/e-com/stocks`, {
+            params: {
+              store_id: APP_CONFIG.STORE_ID,
+              branch_id: APP_CONFIG.BRANCH,
+              page,
+              limit: PAGE_LIMIT,
+              user_id: adminUserId,
+            },
+          });
+          raw = response.data?.data ?? [];
+          responseTotalPages = response.data?.totalPages ?? 1;
+        }
+
+        const mapped = raw
+          .filter((item) => ALLOWED_FLAGS.includes(item.flag))
+          .map(mapItem);
+
+        setTotalPages(responseTotalPages);
+        setPages((prev) => [...prev, mapped]);
+        setCurrentPage(page);
+      } catch (err) {
+        console.error("AllProductsSection fetch error:", err);
+        setError("Failed to load products.");
+      } finally {
+        setLoadingMore(false);
+      }
+    },
+    [isFilterOrSortActive, buildFilterParams, adminUserId],
+  );
+
+  // ── Reset + refetch whenever filters, sort, or search change ─────────────
+  // This is the critical fix: stale pages from the previous query are wiped
+  // before page 1 of the new query is fetched.
+  useEffect(() => {
+    setPages([]);
+    setCurrentPage(1);
+    setTotalPages(null);
+    fetchPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appliedFilterOptions, sortOption, searchTerm, adminUserId]);
+
+  // ── IntersectionObserver ─────────────────────────────────────────────────
+  useEffect(() => {
+    if (observerRef.current) observerRef.current.disconnect();
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          !loadingMore &&
+          (totalPages === null || currentPage < totalPages)
+        ) {
+          fetchPage(currentPage + 1);
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    if (sentinelRef.current) observerRef.current.observe(sentinelRef.current);
+    return () => observerRef.current?.disconnect();
+  }, [loadingMore, currentPage, totalPages, fetchPage]);
+
+  // ── Sync wishlist / cart into already-fetched pages ──────────────────────
+  const allProducts = pages.flat().map((product) => ({
+    ...product,
+    is_wishlisted: wishlistItems.some((w) => w.tagno === product.tagno),
+    is_in_cart: cartItems.some((c) => c.tagno === product.tagno),
+  }));
+
+  const hasMore = totalPages === null || currentPage < totalPages;
+
+  return (
+    <Box>
+      <Typography
+        sx={{
+          fontSize: 16,
+          fontWeight: 600,
+          color: theme.categoryProduct.selectedFilterTextCol,
+          mb: 1.5,
+          letterSpacing: "-0.02em",
+        }}
+      >
+        All Products
+      </Typography>
+
+      {allProducts.length === 0 && !loadingMore ? (
+        <Typography
+          sx={{
+            fontSize: 14,
+            color: theme.categoryProduct.noProductTextCol,
+            textAlign: "center",
+            py: 3,
+          }}
+        >
+          No products found
+        </Typography>
+      ) : (
+        <ProductsList allProducts={allProducts} />
+      )}
+
+      <Box ref={sentinelRef} sx={{ height: 40, mt: 1 }}>
+        {loadingMore && (
+          <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+            <CircularProgress size={24} />
+          </Box>
+        )}
+        {!hasMore && allProducts.length > 0 && (
+          <Typography
+            sx={{
+              textAlign: "center",
+              fontSize: 13,
+              color: theme.categoryProduct.noProductTextCol,
+              py: 2,
+            }}
+          >
+            You've seen it all ✨
+          </Typography>
+        )}
+        {error && (
+          <Typography
+            sx={{
+              textAlign: "center",
+              fontSize: 13,
+              color: "error.main",
+              py: 2,
+            }}
+          >
+            {error}
+          </Typography>
+        )}
+      </Box>
+    </Box>
+  );
+}
+
+export default AllProductsSection;

@@ -1,0 +1,256 @@
+/* General Body and App Styles */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.App {
+  /* padding: 20px; */
+}
+
+/* Card Styles */
+.card-container {
+  width: 250px;
+  height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* border: 1px solid #e0e0e0; */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  align-items: center;
+  text-align: center;
+  /* margin: 10px 30px 0px 80px !important; */
+}
+
+.card-container:hover {
+  cursor: pointer;
+  transform: scale(1.05);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card-content {
+  padding: 16px;
+  position: relative; /* Ensure child elements are positioned correctly */
+  overflow: visible;
+}
+
+.card-title {
+  font-size: 24px;
+  color: #333;
+}
+
+.card-description {
+  font-size: 14px;
+  color: #757575;
+  margin-top: 10px;
+}
+
+.card-description .text1 {
+  font-weight: bold;
+  font-size: 18px; /* Increased font size for text1 */
+  color: #333; /* You can change this color as needed */
+}
+
+.card-description .text2 {
+  font-size: 14px;
+  color: #8196eb;
+}
+
+/* Wrapper for Cards */
+.card-wrapper {
+  display: flex;
+  justify-content: center;  /* Center horizontally */
+  align-items: center;      /* Center vertically */
+}
+
+/* Full Width Card (special case) */
+.card-full-width {
+  width: 18%;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  /* border: 1px solid #e0e0e0; */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 20px 30px 0px 590px;
+}
+
+.card-full-width .card-content {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  width: 100%;
+  gap:20px;
+  flex-direction: column;
+}
+
+.card-full-width .card-title {
+  font-size: 24px;
+  color: #333;
+  margin-right: 10px;
+}
+
+.card-full-width .card-description {
+  font-size: 16px;
+  color: #757575;
+}
+
+.card-wrapper :hover {
+  transform: scale(1.05);
+  /* box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); */
+}
+
+/* Footer Styles */
+.footer {
+  z-index: 100;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  padding: 10px 0;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+  height:10%;
+  margin-top: 60px !important;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.footer-item {
+  text-align: center;
+  flex: 1;
+  padding: 10px;
+}
+
+.footer-item span {
+  font-weight: 600;
+  display: block;
+  color: #4b5768;
+  font-size: 12px;
+  /* margin-top: 5px; */
+}
+
+.icon {
+  font-size: 24px;
+  color: #701f1f;
+}
+
+/* Media Queries */
+@media (max-width: 700px) {
+  /* Cards Layout */
+  .MuiGrid-item {
+    width: 100%; /* Full width for mobile */
+  }
+
+  .card-container {
+    width: 100%; /* Full width for each card in mobile */
+    /* margin: 10px 0px; 
+    height: auto;  */
+  }
+
+  /* For better spacing and scaling of cards */
+  .card-wrapper {
+    flex-direction: column;  /* Stack cards vertically on small screens */
+    align-items: center;      /* Center cards */
+    margin-bottom: 100px;         /* Center the card wrapper */
+  }
+
+  /* Card Title and Description Adjustment */
+  .card-title {
+    font-size: 20px; /* Smaller font size for mobile */
+  }
+
+  .card-description .text1 {
+    font-size: 16px; /* Smaller font size for text1 */
+  }
+
+  .card-description .text2 {
+    font-size: 12px; /* Smaller font size for text2 */
+  }
+}
+
+@media (max-width: 500px) {
+  /* Even smaller screen sizes like phones in portrait */
+  .card-container {
+    width: 90%; /* Reduce the width slightly for smaller screens */
+  }
+
+  .footer-container {
+    justify-content: space-evenly;
+  }
+
+  .footer-item {
+    padding: 5px;
+  }
+
+  .icon {
+    font-size: 18px;
+  }
+
+  .footer-item span {
+    font-size: 10px; /* Smaller text for mobile */
+  }
+
+  .card-full-width {
+    width: 43%;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    /* border: 1px solid #e0e0e0; */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 20px 30px 0px 6px;
+}
+}
+
+@media (min-width: 701px) {
+  /* Laptop or larger screen sizes (tablet to desktop) */
+  .card-container {
+    width: 250px; /* Regular size for larger screens */
+    height: 150px;
+    margin: 10px 30px 0px 80px !important; /* Keep the existing margin */
+  }
+
+  /* Grid Layout (for 3 cards per row in larger screens) */
+  .card-wrapper {
+    margin-bottom: 100px;
+    flex-direction: row; /* Keep them in a row for larger screens */
+    flex-wrap: wrap;
+    justify-content: flex-start; /* Align cards in rows */
+  }
+}
+
+
+.card-count {
+  font-size: 18px;
+  font-weight: bold;
+  color: #ffffff; /* White text color */
+  position: absolute;
+  top: 18px;
+  left: 1px; /* Position count at the top-right corner */
+  background-color: #000; /* Red background */
+  width: 30px; /* Fixed width */
+  height: 30px; /* Fixed height */
+  /* line-height: 40px; */
+  text-align: center; /* Center the text horizontally */
+  border-radius: 50%; /* Circular shape */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Add shadow */
+  z-index: 1; /* Ensure it appears above other elements */
+  display: inline-block; /* Maintain inline behavior */
+}
+
+/* In your CSS file (e.g., App.css) */
+.footer-link {
+  text-decoration: none;
+}
+

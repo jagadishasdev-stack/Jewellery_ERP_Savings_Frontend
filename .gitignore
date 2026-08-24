@@ -1,0 +1,33 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-error.log*
+yarn-debug.log*
+
+# Environment Variables
+.env*
+
+# Build and Android folders
+build/
+/android/
+!/my-razorpay/android/
+!/my-razorpay/android/**
+
+# ignore root ios, but not my-razorpay/ios
+/ios/
+!/my-razorpay/ios/
+!/my-razorpay/ios/**
+
+# ignore root node_modules, but not my-razorpay/node_modules
+/node_modules/
+!/my-razorpay/node_modules/
+!/my-razorpay/node_modules/**
+
+# Secrets — belt and suspenders beyond the /android//ios/ excludes above
+*.jks
+*.keystore
+*.p12
+*.pem
+google-services.json
+GoogleService-Info.plist
+.DS_Store

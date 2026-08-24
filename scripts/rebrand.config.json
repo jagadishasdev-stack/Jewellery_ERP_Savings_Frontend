@@ -1,0 +1,13 @@
+{
+  "appId": "com.jewelsphere.dlj",
+  "appName": "Dhanalakshmi Jewellers Savings",
+  "STORE_NAME": "Dhanalakshmi Jewellers",
+  "versionCode": 1,
+  "versionName": "1.0",
+
+  "_optional_fields_note": "The fields below are OPTIONAL. Remove the leading underscore to activate one — e.g. rename _STORE_ID to STORE_ID and set its value. Fields left with an underscore (or deleted) are NOT touched in src/config/constants.js.",
+  "_STORE_ID_note": "STORE_ID stays deactivated on purpose for DLJ — it's a real Jewellery ERP tenant carrying the STRING Tenant_ID \"DLJ\" (see savingsAppCore.js), not a legacy numeric Store_ID. This script's STORE_ID transform only matches a numeric value and would either abort the whole run or overwrite that string with a number — leave it untouched here and keep editing it by hand in constants.js if it ever needs to change.",
+  "_BRANCH": "DLJ-HO",
+  "_THEME_ID": 3,
+  "_appleid": "6798125047"
+}
