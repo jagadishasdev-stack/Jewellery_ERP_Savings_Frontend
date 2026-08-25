@@ -44,6 +44,7 @@ import { Box } from "@mui/material";
 
 import SelectPlanProcess from "./components/SelectPlanProcess";
 import SavingPlansList from "./components/SavingPlansList";
+import MyDrawsPage from "./components/MyDrawsPage";
 import ContactInfo from "./components/ContactInfo";
 import PaymentAndLedgerPage from "./components/PaymentAndLedgerPage";
 import { App as CapacitorApp } from "@capacitor/app";
@@ -331,6 +332,7 @@ const AppLayout = () => {
               element={<PaymentAndLedgerPage />}
             />
             <Route path="/paymenthistory" element={<PaymentHistory />} />
+            <Route path="/mydraws" element={<MyDrawsPage />} />
             <Route path="/userInfo" element={<EditUserInfo />} />
             <Route path="/searchcustomers" element={<SearchCustomer />} />
             <Route

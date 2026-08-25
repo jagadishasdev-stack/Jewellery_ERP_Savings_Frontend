@@ -21,18 +21,23 @@ import theme from "../theme";
 import Logo from "../assets/img/logo/logo.png";
 import { AuthContext } from "../contexts/AuthContext";
 import { useSafeAreaTop, useSafeAreaBottom } from "../SafeAreaFile";
-// import store_name from "../assets/img/store/store.png";
 import APP_CONFIG from "../config/constants";
 
 import { EcomContext } from "../contexts/EcomContext";
 import { StoreContext } from "../contexts/StoreContext";
-// At the top of the file, replace the import with:
-let store_name = null;
-try {
-  store_name = require("../assets/img/store/store.png");
-} catch (e) {
-  store_name = null;
-}
+// There is no ../assets/img/store/store.png in this repo — a runtime
+// try/catch around require() here looked like a safe "use it if present"
+// guard, but webpack resolves require() paths at BUILD time, not runtime,
+// so a missing file fails the build outright (fatal under CI=true, which
+// most CI/CD hosts — Netlify, Vercel, GitHub Actions — set by default,
+// even though a plain local `npm run build` happened to warn instead of
+// fail). Since the file has never existed, the try/catch always landed on
+// null anyway — this is the exact same real-world behavior (the
+// Typography text-logo fallback below always rendered), just without a
+// require() pointed at a file that can't resolve. Add a real
+// store/store.png and restore the require() if a store logo image is
+// ever wanted here.
+const store_name = null;
 // Little "jump" whenever an item lands in the cart (count goes up).
 const cartBump = keyframes`
   0%   { transform: scale(1); }

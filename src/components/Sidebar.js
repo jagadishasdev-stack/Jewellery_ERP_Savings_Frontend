@@ -18,6 +18,7 @@ import About from "../assets/img/icons/people.svg";
 import Contact from "../assets/img/icons/call-calling.svg";
 import Terms from "../assets/img/icons/note.svg";
 import Rate from "../assets/img/icons/star.svg";
+import LuckyDraw from "../assets/img/icons/magic-star.svg";
 import arrowIcon from "../assets/img/icons/arrow-circle-right.svg";
 import Truck from "../assets/img/icons/truck-fast.svg";
 import Heart from "../assets/img/icons/heart.svg";
@@ -138,6 +139,12 @@ function Sidebar({ open, setOpen }) {
       path: "/paymenthistory",
       icon: Payments,
       subheading: "Payment links generated for you",
+    },
+    role === "user" && {
+      label: "My Lucky Draws",
+      path: "/mydraws",
+      icon: LuckyDraw,
+      subheading: "Draws you've won will show up here",
     },
     role === "agent" && {
       label: "Reports",
